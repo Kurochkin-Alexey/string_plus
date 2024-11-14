@@ -1,0 +1,29 @@
+name: Test and Coveralls
+
+on: ["push", "pull_request"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential lcov check
+
+      - name: Build and test
+        run: cd C2_s21_stringplus-3/src/ && make test-coverage
+      
+      - name: Install gcovr
+        run: sudo apt install gcovr
+
+      - name: Generate coverage report
+        run: gcovr --root . --exclude tests/ --xml -o coverage.xml
+
+      - name: Upload coverage report to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage.xml
